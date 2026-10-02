@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>信函派送段道查询</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6fa;color:#333;min-height:100vh;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#4472C4,#5B9BD5);color:#fff;padding:18px 16px 14px;text-align:center}
+.header h1{font-size:19px;font-weight:600;margin-bottom:3px}
+.header p{font-size:12px;opacity:.85}
+.tabs{display:flex;background:#fff;padding:0 16px;gap:0;box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:20}
+.tabs button{flex:1;height:42px;border:none;background:none;font-size:14px;color:#888;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button.active{color:#4472C4;border-bottom-color:#4472C4;font-weight:600}
+.panel{display:none}
+.panel.active{display:block}
+.search-box{padding:12px 16px}
+.search-wrap{position:relative}
+.search-wrap input{width:100%;height:44px;border:2px solid #e0e0e0;border-radius:22px;padding:0 44px 0 18px;font-size:16px;outline:none;background:#fafafa}
+.search-wrap input:focus{border-color:#4472C4;background:#fff}
+.search-wrap .clear{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:#ccc;color:#fff;border:none;font-size:14px;line-height:24px;cursor:pointer;display:none}
+.search-wrap input:not(:placeholder-shown)+.clear{display:block}
+.letter-bar{display:flex;flex-wrap:wrap;gap:5px;padding:8px 16px}
+.letter-bar button{min-width:30px;height:28px;border:1px solid #ddd;border-radius:6px;background:#fff;font-size:12px;color:#555;cursor:pointer}
+.letter-bar button.active{background:#4472C4;color:#fff;border-color:#4472C4}
+.result-info{padding:6px 16px;font-size:12px;color:#999}
+.result-list{padding:0 16px}
+.result-item{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.result-item .name{font-size:15px;font-weight:500;flex:1;padding-right:10px;word-break:break-all}
+.result-item .duan{flex-shrink:0;padding:4px 12px;border-radius:14px;font-size:13px;font-weight:600;color:#fff}
+.result-item .del-btn{margin-left:8px;width:28px;height:28px;border-radius:50%;border:none;background:#fee;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0}
+.duan-1{background:#E74C3C}.duan-2{background:#3498DB}.duan-3{background:#27AE60}
+.duan-4{background:#F39C12}.duan-5{background:#9B59B6}.duan-6{background:#16A085}
+.empty{text-align:center;padding:50px 20px;color:#999;font-size:14px}
+.empty .icon{font-size:36px;margin-bottom:8px}
+.manage-form{background:#fff;margin:12px 16px;padding:16px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.manage-form h3{font-size:15px;margin-bottom:12px;color:#333}
+.manage-form .row{display:flex;gap:8px;margin-bottom:10px}
+.manage-form input,.manage-form select{flex:1;height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;outline:none}
+.manage-form input:focus,.manage-form select:focus{border-color:#4472C4}
+.manage-form button{height:40px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary{background:#4472C4;color:#fff;flex:1}
+.btn-ghost{background:#f0f0f0;color:#555}
+.btn-danger{background:#e74c3c;color:#fff}
+.manage-actions{display:flex;gap:8px;margin-top:8px}
+.manage-actions button{flex:1}
+.stats{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px}
+.stat-card{flex:1;min-width:80px;background:#fff;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-card .num{font-size:22px;font-weight:700}
+.stat-card .label{font-size:11px;color:#999;margin-top:2px}
+.tip{background:#fff8e1;border-left:4px solid #f39c12;padding:10px 14px;margin:12px 16px;border-radius:6px;font-size:12px;color:#7a6c00;line-height:1.6}
+.tip strong{color:#b8860b}
+.share-box{background:#fff;margin:12px 16px;padding:16px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center}
+.share-box h3{font-size:15px;margin-bottom:10px;color:#333}
+.share-box img{width:160px;height:160px;border:6px solid #f5f6fa;border-radius:8px}
+.share-box .url{font-size:11px;color:#999;word-break:break-all;margin-top:8px;line-height:1.4}
+.share-box .hint{font-size:12px;color:#f39c12;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>信函派送段道查询</h1>
+  <p>输入地址名称，自动匹配所属段道</p>
+</div>
+<div class="tabs">
+  <button class="active" data-panel="search">🔍 查询</button>
+  <button data-panel="browse">📋 浏览</button>
+  <button data-panel="manage">⚙️ 管理</button>
+</div>
+<div class="panel active" id="panel-search">
+  <div class="search-box">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="输入地址，支持拼音首字母如 lgz" autocomplete="off">
+      <button class="clear" id="clearBtn">&times;</button>
+    </div>
+  </div>
+  <div class="result-info" id="searchInfo"></div>
+  <div class="result-list" id="searchList"></div>
+</div>
+<div class="panel" id="panel-browse">
+  <div class="letter-bar" id="letterBar"></div>
+  <div class="result-info" id="browseInfo"></div>
+  <div class="result-list" id="browseList"></div>
+</div>
+<div class="panel" id="panel-manage">
+  <div class="stats" id="stats"></div>
+  <div class="manage-form">
+    <h3>➕ 新增派送点</h3>
+    <div class="row"><input type="text" id="newName" placeholder="派送点名称（小区/单位/路名）"></div>
+    <div class="row">
+      <select id="newDuan">
+        <option value="1段">1段</option><option value="2段">2段</option>
+        <option value="3段">3段</option><option value="4段">4段</option>
+        <option value="5段">5段</option><option value="6段">6段</option>
+      </select>
+      <button class="btn-primary" onclick="addItem()">确认添加</button>
+    </div>
+  </div>
+  <div class="manage-form">
+    <h3>📤 数据导入导出</h3>
+    <div class="manage-actions">
+      <button class="btn-ghost" onclick="exportCSV()">导出 CSV</button>
+      <button class="btn-ghost" onclick="document.getElementById('importFile').click()">导入 CSV</button>
+      <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importCSV(event)">
+    </div>
+    <div class="manage-actions"><button class="btn-danger" onclick="resetData()">恢复默认数据</button></div>
+  </div>
+  <div class="tip">
+    <strong>使用说明：</strong><br>
+    ① 新增/删除的数据保存在本手机浏览器中，换手机需重新导入<br>
+    ② 导出 CSV 可备份或发给管理员更新总表<br>
+    ③ 导入 CSV 格式：首字母,派送点名称,所属段道<br>
+    ④ 「恢复默认数据」会清除所有本地修改，回到初始数据
+  </div>
+  <div class="result-info">当前全部数据（点击 × 可删除）：</div>
+  <div class="result-list" id="manageList"></div>
+</div>
+<script>
+const DEFAULT_DATA = [{"name": "查麦克斯家具（沽河大街75号", "duan": "1段", "py": "chamaikesijiaju（guhedajie75hao", "init": "cmksjj（ghdj7h"}, {"name": "大窑村", "duan": "1段", "py": "dayaocun", "init": "dyc"}, {"name": "法律服务所", "duan": "1段", "py": "falvfuwusuo", "init": "flfws"}, {"name": "港东小学", "duan": "1段", "py": "gangdongxiaoxue", "init": "gdxx"}, {"name": "沽河大街71号", "duan": "1段", "py": "guhedajie71hao", "init": "ghdj7h"}, {"name": "贵和华庭", "duan": "1段", "py": "guihehuating", "init": "ghht"}, {"name": "海城花园", "duan": "1段", "py": "haichenghuayuan", "init": "hchy"}, {"name": "黄家屯", "duan": "1段", "py": "huangjiatun", "init": "hjt"}, {"name": "昊业钢结构", "duan": "1段", "py": "haoyegangjiegou", "init": "hygjg"}, {"name": "韩柱饰品", "duan": "1段", "py": "hanzhushipin", "init": "hzsp"}, {"name": "金岸世家", "duan": "1段", "py": "jinanshijia", "init": "jasj"}, {"name": "聚福大街", "duan": "1段", "py": "jufudajie", "init": "jfdj"}, {"name": "聚福园二期、三期", "duan": "1段", "py": "jufuyuanerqi、sanqi", "init": "jfyeq、sq"}, {"name": "佳佳制帽", "duan": "1段", "py": "jiajiazhimao", "init": "jjzm"}, {"name": "景尚青城", "duan": "1段", "py": "jingshangqingcheng", "init": "jsqc"}, {"name": "锦绣天地", "duan": "1段", "py": "jinxiutiandi", "init": "jxtd"}, {"name": "空港府邸", "duan": "1段", "py": "konggangfudi", "init": "kgfd"}, {"name": "空港兰庭美景", "duan": "1段", "py": "kongganglantingmeijing", "init": "kgltmj"}, {"name": "蓝村西站（收发室）", "duan": "1段", "py": "lancunxizhan（shoufashi）", "init": "lcxz（sfs）"}, {"name": "龙翔大街17号", "duan": "1段", "py": "longxiangdajie17hao", "init": "lxdj1h"}, {"name": "龙翔大街10号、17号", "duan": "1段", "py": "longxiangdajie10hao、17hao", "init": "lxdj1h、h"}, {"name": "联谊星河源", "duan": "1段", "py": "lianyixingheyuan", "init": "lyxhy"}, {"name": "日美工业园", "duan": "1段", "py": "rimeigongyeyuan", "init": "rmgyy"}, {"name": "日美工业园", "duan": "1段", "py": "rimeigongyeyuan", "init": "rmgyy"}, {"name": "水岸绿城", "duan": "1段", "py": "shuianlvcheng", "init": "salc"}, {"name": "盛世家园", "duan": "1段", "py": "shengshijiayuan", "init": "ssjy"}, {"name": "顺盛路", "duan": "1段", "py": "shunshenglu", "init": "ssl"}, {"name": "书香世家（琴岛盛城）", "duan": "1段", "py": "shuxiangshijia（qindaoshengcheng）", "init": "sxsj（qdsc）"}, {"name": "三有制漆", "duan": "1段", "py": "sanyouzhiqi", "init": "syzq"}, {"name": "新港家园", "duan": "1段", "py": "xingangjiayuan", "init": "xgjy"}, {"name": "新港小区", "duan": "1段", "py": "xingangxiaoqu", "init": "xgxq"}, {"name": "鑫泉源超市", "duan": "1段", "py": "xinquanyuanchaoshi", "init": "xqycs"}, {"name": "小窑村", "duan": "1段", "py": "xiaoyaocun", "init": "xyc"}, {"name": "迎宾大道", "duan": "1段", "py": "yingbindadao", "init": "ybdd"}, {"name": "迎宾大街8-35号", "duan": "1段", "py": "yingbindajie8-35hao", "init": "ybdj8h"}, {"name": "宜欣景苑", "duan": "1段", "py": "yixinjingyuan", "init": "yxjy"}, {"name": "亿信美工厂", "duan": "1段", "py": "yixinmeigongchang", "init": "yxmgc"}, {"name": "周臣屯", "duan": "1段", "py": "zhouchentun", "init": "zct"}, {"name": "周家村门头", "duan": "1段", "py": "zhoujiacunmentou", "init": "zjcmt"}, {"name": "张敬军", "duan": "1段", "py": "zhangjingjun", "init": "zjj"}, {"name": "爱琴海附近蓝色大铁门", "duan": "2段", "py": "aiqinhaifujinlansedatiemen", "init": "aqhfjlsdtm"}, {"name": "北王家庄村", "duan": "2段", "py": "beiwangjiazhuangcun", "init": "bwjzc"}, {"name": "第一小学", "duan": "2段", "py": "diyixiaoxue", "init": "dyxx"}, {"name": "飞龙大街", "duan": "2段", "py": "feilongdajie", "init": "fldj"}, {"name": "广场大街17号", "duan": "2段", "py": "guangchangdajie17hao", "init": "gcdj1h"}, {"name": "广场大街17号/古韵路17号", "duan": "2段", "py": "guangchangdajie17hao/guyunlu17hao", "init": "gcdj1h/gyl1h"}, {"name": "广场大街北段", "duan": "2段", "py": "guangchangdajiebeiduan", "init": "gcdjbd"}, {"name": "韩飞衣帽", "duan": "2段", "py": "hanfeiyimao", "init": "hfym"}, {"name": "恒丰制帽", "duan": "2段", "py": "hengfengzhimao", "init": "hfzm"}, {"name": "河荣福苑小区", "duan": "2段", "py": "herongfuyuanxiaoqu", "init": "hrfyxq"}, {"name": "河荣一、二村", "duan": "2段", "py": "herongyi、ercun", "init": "hry、ec"}, {"name": "海时发制品", "duan": "2段", "py": "haishifazhipin", "init": "hsfzp"}, {"name": "华庭雅居", "duan": "2段", "py": "huatingyaju", "init": "htyj"}, {"name": "坤栩工艺品", "duan": "2段", "py": "kunxugongyipin", "init": "kxgyp"}, {"name": "琳达发制品", "duan": "2段", "py": "lindafazhipin", "init": "ldfzp"}, {"name": "李哥庄村", "duan": "2段", "py": "ligezhuangcun", "init": "lgzc"}, {"name": "李哥庄工业园", "duan": "2段", "py": "ligezhuanggongyeyuan", "init": "lgzgyy"}, {"name": "李哥庄小学", "duan": "2段", "py": "ligezhuangxiaoxue", "init": "lgzxx"}, {"name": "南张庄村", "duan": "2段", "py": "nanzhangzhuangcun", "init": "nzzc"}, {"name": "欧亚新天地", "duan": "2段", "py": "ouyaxintiandi", "init": "oyxtd"}, {"name": "孙家村小区", "duan": "2段", "py": "sunjiacunxiaoqu", "init": "sjcxq"}, {"name": "四季双朋酒店", "duan": "2段", "py": "sijishuangpengjiudian", "init": "sjspjd"}, {"name": "世纪苑小区", "duan": "2段", "py": "shijiyuanxiaoqu", "init": "sjyxq"}, {"name": "石拉子村", "duan": "2段", "py": "shilazicun", "init": "slzc"}, {"name": "社新小区", "duan": "2段", "py": "shexinxiaoqu", "init": "sxxq"}, {"name": "台湾大街", "duan": "2段", "py": "taiwandajie", "init": "twdj"}, {"name": "小发", "duan": "2段", "py": "xiaofa", "init": "xf"}, {"name": "祥和苑", "duan": "2段", "py": "xiangheyuan", "init": "xhy"}, {"name": "小林轩酒店", "duan": "2段", "py": "xiaolinxuanjiudian", "init": "xlxjd"}, {"name": "亚朵酒店", "duan": "2段", "py": "yaduojiudian", "init": "ydjd"}, {"name": "永泰新能源发展有限公司", "duan": "2段", "py": "yongtaixinnengyuanfazhanyouxiangongsi", "init": "ytxnyfzyxgs"}, {"name": "优源铸造", "duan": "2段", "py": "youyuanzhuzao", "init": "yyzz"}, {"name": "镇中小区", "duan": "2段", "py": "zhenzhongxiaoqu", "init": "zzxq"}, {"name": "大沽河工业园二区", "duan": "3段", "py": "daguhegongyeyuanerqu", "init": "dghgyyeq"}, {"name": "大沽河开发区", "duan": "3段", "py": "daguhekaifaqu", "init": "dghkfq"}, {"name": "大沽河三区", "duan": "3段", "py": "daguhesanqu", "init": "dghsq"}, {"name": "第九中队", "duan": "3段", "py": "dijiuzhongdui", "init": "djzd"}, {"name": "大屯三个村", "duan": "3段", "py": "datunsangecun", "init": "dtsgc"}, {"name": "沽河大街17号", "duan": "3段", "py": "guhedajie17hao", "init": "ghdj1h"}, {"name": "沽河名邸", "duan": "3段", "py": "guhemingdi", "init": "ghmd"}, {"name": "高家村", "duan": "3段", "py": "gaojiacun", "init": "gjc"}, {"name": "后石龙", "duan": "3段", "py": "houshilong", "init": "hsl"}, {"name": "惠众超市", "duan": "3段", "py": "huizhongchaoshi", "init": "hzcs"}, {"name": "君乐饭店", "duan": "3段", "py": "junlefandian", "init": "jlfd"}, {"name": "龙湖大街", "duan": "3段", "py": "longhudajie", "init": "lhdj"}, {"name": "龙湖璟宸原著", "duan": "3段", "py": "longhujingchenyuanzhu", "init": "lhjcyz"}, {"name": "龙湖小区", "duan": "3段", "py": "longhuxiaoqu", "init": "lhxq"}, {"name": "龙屯馨居", "duan": "3段", "py": "longtunxinju", "init": "ltxj"}, {"name": "李王路（八中）", "duan": "3段", "py": "liwanglu（bazhong）", "init": "lwl（bz）"}, {"name": "毛家庄", "duan": "3段", "py": "maojiazhuang", "init": "mjz"}, {"name": "南王家庄村", "duan": "3段", "py": "nanwangjiazhuangcun", "init": "nwjzc"}, {"name": "南张家庄", "duan": "3段", "py": "nanzhangjiazhuang", "init": "nzjz"}, {"name": "青岛弘牧智能机械科技公司", "duan": "3段", "py": "qingdaohongmuzhinengjixiekejigongsi", "init": "qdhmznjxkjgs"}, {"name": "前石龙", "duan": "3段", "py": "qianshilong", "init": "qsl"}, {"name": "瑞源发制品", "duan": "3段", "py": "ruiyuanfazhipin", "init": "ryfzp"}, {"name": "世纪华庭", "duan": "3段", "py": "shijihuating", "init": "sjht"}, {"name": "天能重工三期", "duan": "3段", "py": "tiannengzhonggongsanqi", "init": "tnzgsq"}, {"name": "桃源公寓", "duan": "3段", "py": "taoyuangongyu", "init": "tygy"}, {"name": "魏家屯工业园（海硕）", "duan": "3段", "py": "weijiatungongyeyuan（haishuo）", "init": "wjtgyy（hs）"}, {"name": "王新村", "duan": "3段", "py": "wangxincun", "init": "wxc"}, {"name": "香港大街", "duan": "3段", "py": "xianggangdajie", "init": "xgdj"}, {"name": "邮局南头门头", "duan": "3段", "py": "youjunantoumentou", "init": "yjntmt"}, {"name": "北张", "duan": "4段", "py": "beizhang", "init": "bz"}, {"name": "东方花园", "duan": "4段", "py": "dongfanghuayuan", "init": "dfhy"}, {"name": "东小埠村", "duan": "4段", "py": "dongxiaobucun", "init": "dxbc"}, {"name": "后辛瞳", "duan": "4段", "py": "houxintong", "init": "hxt"}, {"name": "矫戈庄村", "duan": "4段", "py": "jiaogezhuangcun", "init": "jgzc"}, {"name": "聚合煤炭", "duan": "4段", "py": "juhemeitan", "init": "jhmt"}, {"name": "纪家庄", "duan": "4段", "py": "jijiazhuang", "init": "jjz"}, {"name": "贾瞳", "duan": "4段", "py": "jiatong", "init": "jt"}, {"name": "冷家庄村", "duan": "4段", "py": "lengjiazhuangcun", "init": "ljzc"}, {"name": "老窑村", "duan": "4段", "py": "laoyaocun", "init": "lyc"}, {"name": "前辛瞳", "duan": "4段", "py": "qianxintong", "init": "qxt"}, {"name": "双京村", "duan": "4段", "py": "shuangjingcun", "init": "sjc"}, {"name": "孙家村", "duan": "4段", "py": "sunjiacun", "init": "sjc"}, {"name": "田甲", "duan": "4段", "py": "tianjia", "init": "tj"}, {"name": "陶家庄", "duan": "4段", "py": "taojiazhuang", "init": "tjz"}, {"name": "西小埠村", "duan": "4段", "py": "xixiaobucun", "init": "xxbc"}, {"name": "小辛瞳", "duan": "4段", "py": "xiaoxintong", "init": "xxt"}, {"name": "邮局北部（门头）", "duan": "4段", "py": "youjubeibu（mentou）", "init": "yjbb（mt）"}, {"name": "周家村（村里）", "duan": "4段", "py": "zhoujiacun（cunli）", "init": "zjc（cl）"}, {"name": "中心卫生院", "duan": "4段", "py": "zhongxinweishengyuan", "init": "zxwsy"}, {"name": "爱发发制品", "duan": "5段", "py": "aifafazhipin", "init": "affzp"}, {"name": "八中学校", "duan": "5段", "py": "bazhongxuexiao", "init": "bzxx"}, {"name": "东方夏威夷", "duan": "5段", "py": "dongfangxiaweiyi", "init": "dfxwy"}, {"name": "第十四中学", "duan": "5段", "py": "dishisizhongxue", "init": "dsszx"}, {"name": "福临花小区", "duan": "5段", "py": "fulinhuaxiaoqu", "init": "flhxq"}, {"name": "枫叶发制品", "duan": "5段", "py": "fengyefazhipin", "init": "fyfzp"}, {"name": "夫永公司", "duan": "5段", "py": "fuyonggongsi", "init": "fygs"}, {"name": "广场小区（教师楼）", "duan": "5段", "py": "guangchangxiaoqu（jiaoshilou）", "init": "gcxq（jsl）"}, {"name": "冠达假发", "duan": "5段", "py": "guandajiafa", "init": "gdjf"}, {"name": "沽河花园", "duan": "5段", "py": "guhehuayuan", "init": "ghhy"}, {"name": "贵和嘉悦府", "duan": "5段", "py": "guihejiayuefu", "init": "ghjyf"}, {"name": "惠客多超市", "duan": "5段", "py": "huikeduochaoshi", "init": "hkdcs"}, {"name": "华庭丽景", "duan": "5段", "py": "huatinglijing", "init": "htlj"}, {"name": "金岸丽景三期", "duan": "5段", "py": "jinanlijingsanqi", "init": "jaljsq"}, {"name": "江鸿工艺品", "duan": "5段", "py": "jianghonggongyipin", "init": "jhgyp"}, {"name": "金启运工艺品", "duan": "5段", "py": "jinqiyungongyipin", "init": "jqygyp"}, {"name": "景尚蓝湾", "duan": "5段", "py": "jingshanglanwan", "init": "jslw"}, {"name": "锦绣苑", "duan": "5段", "py": "jinxiuyuan", "init": "jxy"}, {"name": "家肴饭店", "duan": "5段", "py": "jiayaofandian", "init": "jyfd"}, {"name": "金源路25号", "duan": "5段", "py": "jinyuanlu25hao", "init": "jyl2h"}, {"name": "李哥庄派出所", "duan": "5段", "py": "ligezhuangpaichusuo", "init": "lgzpcs"}, {"name": "李魏屯", "duan": "5段", "py": "liweitun", "init": "lwt"}, {"name": "李新小区", "duan": "5段", "py": "lixinxiaoqu", "init": "lxxq"}, {"name": "联谊大街（政府东段）", "duan": "5段", "py": "lianyidajie（zhengfudongduan）", "init": "lydj（zfdd）"}, {"name": "联谊馨家园", "duan": "5段", "py": "lianyixinjiayuan", "init": "lyxjy"}, {"name": "毛家村", "duan": "5段", "py": "maojiacun", "init": "mjc"}, {"name": "农商银行", "duan": "5段", "py": "nongshangyinhang", "init": "nsyh"}, {"name": "南张花园小区", "duan": "5段", "py": "nanzhanghuayuanxiaoqu", "init": "nzhyxq"}, {"name": "青岛风景（李王路7号）", "duan": "5段", "py": "qingdaofengjing（liwanglu7hao）", "init": "qdfj（lwl7h）"}, {"name": "琴岛新城", "duan": "5段", "py": "qindaoxincheng", "init": "qdxc"}, {"name": "天怡家园", "duan": "5段", "py": "tianyijiayuan", "init": "tyjy"}, {"name": "纬二路", "duan": "5段", "py": "weierlu", "init": "wel"}, {"name": "魏家屯", "duan": "5段", "py": "weijiatun", "init": "wjt"}, {"name": "纬三路", "duan": "5段", "py": "weisanlu", "init": "wsl"}, {"name": "星城小区", "duan": "5段", "py": "xingchengxiaoqu", "init": "xcxq"}, {"name": "鑫都合苑", "duan": "5段", "py": "xindouheyuan", "init": "xdhy"}, {"name": "迎宾大街17号", "duan": "5段", "py": "yingbindajie17hao", "init": "ybdj1h"}, {"name": "云海洗浴", "duan": "5段", "py": "yunhaixiyu", "init": "yhxy"}, {"name": "叶子发艺", "duan": "5段", "py": "yezifayi", "init": "yzfy"}, {"name": "综合执法", "duan": "5段", "py": "zonghezhifa", "init": "zhzf"}, {"name": "贵都花园", "duan": "6段", "py": "guidouhuayuan", "init": "gdhy"}, {"name": "华林苑", "duan": "6段", "py": "hualinyuan", "init": "hly"}, {"name": "胶东镇", "duan": "6段", "py": "jiaodongzhen", "init": "jdz"}, {"name": "康利来蛋糕店", "duan": "6段", "py": "kanglilaidangaodian", "init": "klldgd"}, {"name": "刘家店", "duan": "6段", "py": "liujiadian", "init": "ljd"}, {"name": "利客来超市", "duan": "6段", "py": "likelaichaoshi", "init": "lklcs"}, {"name": "联谊大街（政府西段）", "duan": "6段", "py": "lianyidajie（zhengfuxiduan）", "init": "lydj（zfxd）"}, {"name": "圈子村", "duan": "6段", "py": "quanzicun", "init": "qzc"}, {"name": "顺盛聚福园", "duan": "6段", "py": "shunshengjufuyuan", "init": "ssjfy"}, {"name": "谈家庄", "duan": "6段", "py": "tanjiazhuang", "init": "tjz"}, {"name": "新城家园", "duan": "6段", "py": "xinchengjiayuan", "init": "xcjy"}, {"name": "迎宾小区", "duan": "6段", "py": "yingbinxiaoqu", "init": "ybxq"}, {"name": "雍翠花园", "duan": "6段", "py": "yongcuihuayuan", "init": "ychy"}, {"name": "政府", "duan": "6段", "py": "zhengfu", "init": "zf"}, {"name": "张杨屯", "duan": "6段", "py": "zhangyangtun", "init": "zyt"}];
+const STORAGE_KEY = 'paifa_data_v2';
+const DUAN_COLORS = {"1段":"duan-1","2段":"duan-2","3段":"duan-3","4段":"duan-4","5段":"duan-5","6段":"duan-6"};
+const DUAN_LIST = ["1段","2段","3段","4段","5段","6段"];
+let DATA = loadData();
+function loadData(){try{const s=localStorage.getItem(STORAGE_KEY);if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(DEFAULT_DATA));}
+function saveData(){localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));}
+document.querySelectorAll('.tabs button').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('panel-'+btn.dataset.panel).classList.add('active');if(btn.dataset.panel==='browse')renderBrowse();if(btn.dataset.panel==='manage')renderManage();});});
+const searchInput=document.getElementById('searchInput');const clearBtn=document.getElementById('clearBtn');
+function match(item,kw){if(!kw)return true;kw=kw.toLowerCase();return item.name.toLowerCase().includes(kw)||item.py.toLowerCase().includes(kw)||item.init.toLowerCase().includes(kw);}
+function renderSearch(){const kw=searchInput.value.trim();let list=DATA.filter(d=>match(d,kw));if(kw)list.sort((a,b)=>{const as=a.name.startsWith(kw)?0:1,bs=b.name.startsWith(kw)?0:1;if(as!==bs)return as-bs;return a.name.localeCompare(b.name,'zh');});document.getElementById('searchInfo').textContent=kw?'找到 '+list.length+' 个匹配':'共 '+DATA.length+' 个派送点，输入关键词筛选';document.getElementById('searchList').innerHTML=list.length?list.map(item=>'<div class="result-item"><span class="name">'+item.name+'</span><span class="duan '+DUAN_COLORS[item.duan]+'">'+item.duan+'</span></div>').join(''):'<div class="empty"><div class="icon">🔍</div>未找到匹配项</div>';}
+searchInput.addEventListener('input',renderSearch);clearBtn.addEventListener('click',()=>{searchInput.value='';renderSearch();searchInput.focus();});
+let activeLetter='';
+const letters=[...new Set(DATA.map(d=>d.init[0].toUpperCase()))].sort();
+document.getElementById('letterBar').innerHTML='<button data-l="">全部</button>'+letters.map(l=>'<button data-l="'+l+'">'+l+'</button>').join('');
+document.getElementById('letterBar').addEventListener('click',e=>{if(e.target.tagName==='BUTTON'){activeLetter=e.target.dataset.l;document.querySelectorAll('#letterBar button').forEach(b=>b.classList.toggle('active',b===e.target));renderBrowse();}});
+function renderBrowse(){let list=activeLetter?DATA.filter(d=>d.init[0].toUpperCase()===activeLetter):DATA;list.sort((a,b)=>a.duan.localeCompare(b.duan)||a.name.localeCompare(b.name,'zh'));document.getElementById('browseInfo').textContent=activeLetter?'首字母 '+activeLetter+'：'+list.length+' 个':'全部 '+list.length+' 个，按段道排序';document.getElementById('browseList').innerHTML=list.length?list.map(item=>'<div class="result-item"><span class="name">'+item.name+'</span><span class="duan '+DUAN_COLORS[item.duan]+'">'+item.duan+'</span></div>').join(''):'<div class="empty">暂无数据</div>';}
+function addItem(){const name=document.getElementById('newName').value.trim();const duan=document.getElementById('newDuan').value;if(!name){alert('请输入派送点名称');return;}if(DATA.some(d=>d.name===name)){alert('该名称已存在');return;}DATA.push({name:name,duan:duan,py:name,init:name.charAt(0)});saveData();document.getElementById('newName').value='';renderManage();alert('已添加：'+name+'（'+duan+'）');}
+function deleteItem(name){if(!confirm('确认删除「'+name+'」？'))return;DATA=DATA.filter(d=>d.name!==name);saveData();renderManage();renderSearch();}
+function getColor(d){return {"1段":"#E74C3C","2段":"#3498DB","3段":"#27AE60","4段":"#F39C12","5段":"#9B59B6","6段":"#16A085"}[d]||"#333";}
+function renderManage(){const stats={};DUAN_LIST.forEach(d=>stats[d]=0);DATA.forEach(d=>{stats[d.duan]=(stats[d.duan]||0)+1;});document.getElementById('stats').innerHTML=DUAN_LIST.map(d=>'<div class="stat-card"><div class="num" style="color:'+getColor(d)+'">'+(stats[d]||0)+'</div><div class="label">'+d+'</div></div>').join('')+'<div class="stat-card"><div class="num" style="color:#333">'+DATA.length+'</div><div class="label">总计</div></div>';let list=[...DATA].sort((a,b)=>a.duan.localeCompare(b.duan)||a.name.localeCompare(b.name,'zh'));document.getElementById('manageList').innerHTML=list.map(item=>'<div class="result-item"><span class="name">'+item.name+'</span><span class="duan '+DUAN_COLORS[item.duan]+'">'+item.duan+'</span><button class="del-btn" onclick="deleteItem(\''+item.name.replace(/'/g,"\\'")+'\')">&times;</button></div>').join('');}
+function exportCSV(){let list=[...DATA].sort((a,b)=>a.init.localeCompare(b.init)||a.name.localeCompare(b.name,'zh'));let csv='\ufeff首字母,派送点名称,所属段道\n';list.forEach(d=>{csv+=d.init.charAt(0).toUpperCase()+','+d.name+','+d.duan+'\n';});const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='信函派送段道_'+new Date().toISOString().slice(0,10)+'.csv';a.click();}
+function importCSV(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){const text=ev.target.result;const lines=text.split(/\r?\n/).filter(l=>l.trim());const newData=[];for(let i=1;i<lines.length;i++){const parts=lines[i].split(',');if(parts.length>=3&&parts[1].trim()){newData.push({name:parts[1].trim(),duan:parts[2].trim(),py:parts[1].trim(),init:parts[1].trim().charAt(0)});}}if(newData.length===0){alert('CSV格式不正确或无数据');return;}if(confirm('导入 '+newData.length+' 条数据，将覆盖当前数据，确认？')){DATA=newData;saveData();renderManage();renderSearch();alert('导入成功');}};reader.readAsText(file,'utf-8');e.target.value='';}
+function resetData(){if(confirm('确认恢复默认数据？所有本地新增/删除将被清除！')){localStorage.removeItem(STORAGE_KEY);DATA=JSON.parse(JSON.stringify(DEFAULT_DATA));renderManage();renderSearch();alert('已恢复默认数据');}}
+renderSearch();
+</script>
+<div class="share-box">
+  <h3>📱 扫码分享此页面</h3>
+  <img id="qrImg" src="" alt="页面二维码">
+  <div class="url" id="pageUrl"></div>
+  <div class="hint">把本页面部署到任意网址后，此处自动生成二维码，打印出来即可扫码使用</div>
+</div>
+<script>
+(function(){var url=location.href;if(url.indexOf('file://')===0||url.indexOf('about:')===0){document.getElementById('qrImg').style.display='none';document.getElementById('pageUrl').textContent='当前为本地文件打开，请先部署到网页服务器获取网址';}else{document.getElementById('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data='+encodeURIComponent(url);document.getElementById('pageUrl').textContent=url;}})();
+</script>
+</body>
+</html>
